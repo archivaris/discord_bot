@@ -32,8 +32,14 @@ client.on("message", async message => {
 
     } else if (message.content.startsWith(`${prefix}stop`)) {
         stop(message, serverQueue);
-
-
+    } else if (message.content.startsWith(`${prefix}help`)) {
+        message.channel.send("*******\n" +
+            "                 help  music-bot menu:\n" +
+                             "*******\n"+
+            "                 !play {url} : play/add song to playlist followed by YouTube URL\n" +
+            "                 !next : skip current song\n" +
+            "                 !stop : stop the music\n" +
+            "                 !help : help menu\n");
     } else {
         message.channel.send("You need to enter a valid command!");
     }
