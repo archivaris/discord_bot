@@ -24,27 +24,33 @@ client.on("message", async message => {
 
     const serverQueue = queue.get(message.guild.id);
 
+
     if (message.content.startsWith(`${prefix}play`)) {
         await execute(message, serverQueue);
-
     } else if (message.content.startsWith(`${prefix}next`)) {
         next(message, serverQueue);
+    } else if (message.content.startsWith(`${prefix}pause`)) {
+        pause(message, serverQueue);
+    } else if (message.content.startsWith(`${prefix}resume`)) {
+        resume(message, serverQueue);
 
     } else if (message.content.startsWith(`${prefix}stop`)) {
         stop(message, serverQueue);
 
     } else if (message.content.startsWith(`${prefix}help`)) {
-        await message.channel.startTyping();
-        await message.channel.send("```" +
+        message.channel.startTyping();
+        message.channel.send("```" +
             "help  music-bot menu:\n" +
             "!play {url} : play/add song to playlist followed by YouTube URL\n" +
             "!next : skip current song\n" +
             "!stop : stop the music\n" +
+            "!pause : pause the music\n" +
+            "!resume : continue the music\n" +
             "!help : help menu\n```");
         message.channel.stopTyping();
 
     } else {
-        await message.channel.send("You need to enter a valid command!");
+        message.channel.send("You need to enter a valid command!");
     }
 });
 
@@ -61,6 +67,8 @@ async function execute(message, serverQueue) {
             title: songInfo.title,
             url: songInfo.video_id
         };
+        console.log(song);
+
         if (!voiceChannel)
             return message.channel.send("You need to be in a voice channel to play music!");
 
@@ -98,12 +106,13 @@ async function execute(message, serverQueue) {
             return message.channel.send(`${song.title} has been added to the queue!`);
         }
     } else {
+        args.shift()
         const songInfo = await youtube.searchVideos(args);
         const song = {
             title: songInfo.title,
             url: songInfo.id
         };
-
+        console.log(song);
         console.log("nu e url ")
         console.log(args);
         if (!voiceChannel)
@@ -144,7 +153,9 @@ async function execute(message, serverQueue) {
         }
     }
 
+
 }
+
 
 function next(message, serverQueue) {
     if (!message.member.voice.channel)
@@ -163,6 +174,23 @@ function stop(message, serverQueue) {
         );
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
+}
+
+function pause(message, serverQueue) {
+    if (!message.member.voice.channel)
+        return message.channel.send(
+            "You have to be in a voice channel to stop the music!"
+        );
+    serverQueue.connection.dispatcher.pause(true);
+}
+
+
+function resume(message, serverQueue) {
+    if (!message.member.voice.channel)
+        return message.channel.send(
+            "You have to be in a voice channel to stop the music!"
+        );
+    serverQueue.connection.dispatcher.resume();
 }
 
 function play(guild, song) {
