@@ -10,13 +10,14 @@ const queue = new Map();
 client.once("ready", () => {
     console.log("Ready!");
 });
+
 client.once("reconnecting", () => {
     console.log("Reconnecting!");
 });
+
 client.once("disconnect", () => {
     console.log("Disconnect!");
 });
-
 
 client.on("message", async message => {
     if (message.author.bot) return;
@@ -24,20 +25,22 @@ client.on("message", async message => {
 
     const serverQueue = queue.get(message.guild.id);
 
-
     if (message.content.startsWith(`${prefix}play`)) {
         await execute(message, serverQueue);
-    } else if (message.content.startsWith(`${prefix}next`)) {
+    }
+    else if (message.content.startsWith(`${prefix}next`)) {
         next(message, serverQueue);
-    } else if (message.content.startsWith(`${prefix}pause`)) {
+    }
+    else if (message.content.startsWith(`${prefix}pause`)) {
         pause(message, serverQueue);
-    } else if (message.content.startsWith(`${prefix}resume`)) {
+    }
+    else if (message.content.startsWith(`${prefix}resume`)) {
         resume(message, serverQueue);
-
-    } else if (message.content.startsWith(`${prefix}stop`)) {
+    }
+    else if (message.content.startsWith(`${prefix}stop`)) {
         stop(message, serverQueue);
-
-    } else if (message.content.startsWith(`${prefix}help`)) {
+    }
+    else if (message.content.startsWith(`${prefix}help`)) {
         message.channel.startTyping();
         message.channel.send("```" +
             "help  music-bot menu:\n" +
@@ -48,32 +51,28 @@ client.on("message", async message => {
             "!resume : continue the music\n" +
             "!help : help menu\n```");
         message.channel.stopTyping();
-
-    } else {
+    }
+    else {
         message.channel.send("You need to enter a valid command!");
     }
 });
 
 async function execute(message, serverQueue) {
-
     const args = message.content.split(" ");
     const voiceChannel = message.member.voice.channel;
 
-
     if (validURL(args[1])) {
-        console.log("e url")
+        console.log("it's url")
         const songInfo = await ytdl.getInfo(args[1]);
         const song = {
             title: songInfo.title,
             url: songInfo.video_id
         };
         console.log(song);
-
         if (!voiceChannel)
             return message.channel.send("You need to be in a voice channel to play music!");
 
         const permissions = voiceChannel.permissionsFor(message.client.user);
-
         if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
             return message.channel.send("I need the permissions to join and speak in your voice channel!");
         }
@@ -87,11 +86,8 @@ async function execute(message, serverQueue) {
                 volume: 7,
                 playing: true
             };
-
             queue.set(message.guild.id, queueContruct);
-
             queueContruct.songs.push(song);
-
             try {
                 var connection = await voiceChannel.join();
                 queueContruct.connection = connection;
@@ -113,17 +109,14 @@ async function execute(message, serverQueue) {
             url: songInfo.id
         };
         console.log(song);
-        console.log("nu e url ")
+        console.log("NOT url ")
         console.log(args);
         if (!voiceChannel)
             return message.channel.send("You need to be in a voice channel to play music!");
-
         const permissions = voiceChannel.permissionsFor(message.client.user);
-
         if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
             return message.channel.send("I need the permissions to join and speak in your voice channel!");
         }
-
         if (!serverQueue) {
             const queueContruct = {
                 textChannel: message.channel,
@@ -133,11 +126,8 @@ async function execute(message, serverQueue) {
                 volume: 7,
                 playing: true
             };
-
             queue.set(message.guild.id, queueContruct);
-
             queueContruct.songs.push(song);
-
             try {
                 var connection = await voiceChannel.join();
                 queueContruct.connection = connection;
@@ -152,10 +142,7 @@ async function execute(message, serverQueue) {
             return message.channel.send(`${song.title} has been added to the queue!`);
         }
     }
-
-
 }
-
 
 function next(message, serverQueue) {
     if (!message.member.voice.channel)
@@ -184,7 +171,6 @@ function pause(message, serverQueue) {
     serverQueue.connection.dispatcher.pause(true);
 }
 
-
 function resume(message, serverQueue) {
     if (!message.member.voice.channel)
         return message.channel.send(
@@ -200,7 +186,6 @@ function play(guild, song) {
         queue.delete(guild.id);
         return;
     }
-
     const dispatcher = serverQueue.connection
         .play(ytdl(song.url))
         .on("finish", () => {
